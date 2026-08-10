@@ -1,0 +1,81 @@
+{
+  "model": "sonnet",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ ! -f \"$CLAUDE_PROJECT_DIR/CLAUDE.md\" ]; then echo 'WARNING: No CLAUDE.md found in this project. Consider creating one to help Claude understand your project conventions and structure.'; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/fetch-usage.sh > /dev/null 2>&1 &"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME\"/.claude/hooks/gh-api-allow-quoted-braces.py",
+            "if": "Bash(gh api:*)"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/fetch-usage.sh > /dev/null 2>&1 &"
+          },
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/set-tab-title.sh 'claude ✅'"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/set-tab-title.sh 'claude 👷'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ~/.claude/hooks/set-tab-title.sh 'claude ⁉️'"
+          }
+        ]
+      }
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  },
+  "alwaysThinkingEnabled": true,
+  "effortLevel": "medium",
+  "tui": "fullscreen",
+  "skipAutoPermissionPrompt": true
+}
