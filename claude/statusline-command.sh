@@ -106,12 +106,12 @@ fi
 SEP="\033[90m • \033[0m"
 
 # line 1
-printf "\033[38;5;208m\033[1m%s\033[22m\033[0m" "$model"
+printf "\033[38;5;208m%s\033[0m" "$model"
 printf "\033[90m | \033[0m"
-printf "\033[1m\033[38;2;76;208;222m%s\033[22m\033[0m" "$dir_name"
+printf "\033[38;2;76;208;222m%s\033[0m" "$dir_name"
 if [ -n "$branch" ]; then
   printf "%b" "$SEP"
-  printf "\033[1m\033[38;2;192;103;222m%s\033[22m\033[0m" "$branch"
+  printf "\033[38;2;192;103;222m%s\033[0m" "$branch"
 fi
 
 # line 2
