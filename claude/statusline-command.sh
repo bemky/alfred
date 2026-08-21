@@ -59,7 +59,11 @@ esac
 # --- compute_delta: given a raw ISO timestamp, returns human-readable time until reset ---
 compute_delta() {
   clean=$(echo "$1" | sed 's/\.[0-9]*//' | sed 's/[+-][0-9][0-9]:[0-9][0-9]$//' | sed 's/Z$//')
-  reset_epoch=$(TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%S" "$clean" "+%s" 2>/dev/null)
+  if date -j -f "%Y-%m-%dT%H:%M:%S" "$clean" "+%s" >/dev/null 2>&1; then
+    reset_epoch=$(TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%S" "$clean" "+%s" 2>/dev/null)
+  else
+    reset_epoch=$(date -u -d "$clean" "+%s" 2>/dev/null)
+  fi
   if [ -z "$reset_epoch" ]; then return; fi
   now_epoch=$(date -u "+%s")
   diff=$(( reset_epoch - now_epoch ))
@@ -79,9 +83,17 @@ compute_delta() {
 # --- format_month_day: given a raw ISO timestamp, returns e.g. "Sep 13" in local time ---
 format_month_day() {
   clean=$(echo "$1" | sed 's/\.[0-9]*//' | sed 's/[+-][0-9][0-9]:[0-9][0-9]$//' | sed 's/Z$//')
-  epoch=$(TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%S" "$clean" "+%s" 2>/dev/null)
+  if date -j -f "%Y-%m-%dT%H:%M:%S" "$clean" "+%s" >/dev/null 2>&1; then
+    epoch=$(TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%S" "$clean" "+%s" 2>/dev/null)
+  else
+    epoch=$(date -u -d "$clean" "+%s" 2>/dev/null)
+  fi
   if [ -z "$epoch" ]; then return; fi
-  date -r "$epoch" "+%b %-d"
+  if date -r "$epoch" "+%b %-d" >/dev/null 2>&1; then
+    date -r "$epoch" "+%b %-d"
+  else
+    date -d "@$epoch" "+%b %-d"
+  fi
 }
 
 # --- context window ---
