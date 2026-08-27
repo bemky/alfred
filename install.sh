@@ -36,9 +36,10 @@ fi
 cp "$repo_dir/claude/statusline-command-$os_suffix.sh" "$claude_dir/statusline-command.sh"
 cp "$repo_dir/claude/fetch-usage-$os_suffix.sh" "$claude_dir/fetch-usage.sh"
 cp "$repo_dir/claude/hooks/set-tab-title.sh" "$claude_dir/hooks/set-tab-title.sh"
+cp "$repo_dir/claude/hooks/set-tmux-window-name.sh" "$claude_dir/hooks/set-tmux-window-name.sh"
 cp "$repo_dir/claude/hooks/gh-api-allow-quoted-braces.py" "$claude_dir/hooks/gh-api-allow-quoted-braces.py"
 cp "$repo_dir/claude/commands/meeting-notes.md" "$claude_dir/commands/meeting-notes.md"
-chmod +x "$claude_dir/statusline-command.sh" "$claude_dir/fetch-usage.sh" "$claude_dir/hooks/set-tab-title.sh"
+chmod +x "$claude_dir/statusline-command.sh" "$claude_dir/fetch-usage.sh" "$claude_dir/hooks/set-tab-title.sh" "$claude_dir/hooks/set-tmux-window-name.sh"
 
 settings_file="$claude_dir/settings.json"
 fragment_files=("$repo_dir/claude/settings.fragment.json")
