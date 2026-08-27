@@ -13,6 +13,25 @@ Copies `claude/*` into `~/.claude/` and merges `claude/settings.fragment.json`
 into `~/.claude/settings.json` (via `jq`, additive — won't clobber
 device-specific keys like `enabledPlugins` or `feedbackSurveyState`).
 
+### Multiple profiles
+
+To bootstrap a second profile (e.g. a separate work login via
+`CLAUDE_CONFIG_DIR`), install into that dir instead:
+
+```bash
+CLAUDE_CONFIG_DIR=~/.claude-jll ./install.sh
+```
+
+All paths in `settings.fragment.json` and the shipped scripts resolve
+`$CLAUDE_CONFIG_DIR` (falling back to `~/.claude`) at runtime, so each profile
+reads its own credentials and writes to its own `/tmp` usage cache — profiles
+never clobber each other's status line. Launch each profile with an alias
+that sets the same env var, e.g.:
+
+```bash
+alias claude-jll='CLAUDE_CONFIG_DIR=~/.claude-jll claude'
+```
+
 ## Layout
 
 - `claude/CLAUDE.md` — global user instructions

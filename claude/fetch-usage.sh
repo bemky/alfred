@@ -1,5 +1,7 @@
 #!/bin/sh
-# Fetches Claude usage stats and writes them to /tmp/.claude_usage_cache.
+# Fetches Claude usage stats and writes them to a $CLAUDE_CONFIG_DIR-scoped
+# cache file under /tmp (so multiple profiles, e.g. ~/.claude-jll, don't clobber
+# each other's cached usage).
 # Cache format is line-based; line 1 is the mode.
 #
 # mode "subscription" (personal plan: 5h / 7d token limits):
@@ -22,12 +24,15 @@
 #
 # All output is suppressed; meant to be run in background.
 
-CACHE_FILE="/tmp/.claude_usage_cache"
+CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+CACHE_FILE="/tmp/.claude_usage_cache_$(basename "$CONFIG_DIR")"
 
+# NOTE: macOS keychain lookup is not profile-aware (one "Claude Code-credentials"
+# entry per keychain) — multi-profile setups on macOS need the file-based path.
 if command -v security >/dev/null 2>&1; then
   raw_creds=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)
 else
-  raw_creds=$(cat "$HOME/.claude/.credentials.json" 2>/dev/null)
+  raw_creds=$(cat "$CONFIG_DIR/.credentials.json" 2>/dev/null)
 fi
 if [ -z "$raw_creds" ]; then
   exit 0

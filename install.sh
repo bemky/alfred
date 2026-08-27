@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# Bootstraps ~/.claude on this machine from the files in this repo.
+# Bootstraps a Claude Code config dir on this machine from the files in this
+# repo. Defaults to ~/.claude; pass CLAUDE_CONFIG_DIR to target a different
+# profile (e.g. `CLAUDE_CONFIG_DIR=~/.claude-jll ./install.sh`).
 # Safe to re-run: copies scripts/commands as-is, merges settings.fragment.json
 # into settings.json without clobbering device-specific keys (enabledPlugins,
 # feedbackSurveyState, preferredNotifChannel, etc).
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-claude_dir="$HOME/.claude"
+claude_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 
 mkdir -p "$claude_dir/hooks" "$claude_dir/commands"
 
