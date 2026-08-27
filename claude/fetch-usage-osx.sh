@@ -24,7 +24,11 @@
 
 CACHE_FILE="/tmp/.claude_usage_cache"
 
-raw_creds=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)
+if command -v security >/dev/null 2>&1; then
+  raw_creds=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)
+else
+  raw_creds=$(cat "$HOME/.claude/.credentials.json" 2>/dev/null)
+fi
 if [ -z "$raw_creds" ]; then
   exit 0
 fi
