@@ -44,6 +44,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/set-tab-title.sh\" 'claude ✅'"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/set-tmux-window-name.sh\" 'claude ✅'"
           }
         ]
       }
@@ -54,6 +58,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/set-tab-title.sh\" 'claude 👷'"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/set-tmux-window-name.sh\" 'claude 👷'"
           }
         ]
       }
@@ -65,6 +73,10 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/set-tab-title.sh\" 'claude ⁉️'"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_CONFIG_DIR:-$HOME/.claude}/hooks/set-tmux-window-name.sh\" 'claude ⁉️'"
           }
         ]
       }
