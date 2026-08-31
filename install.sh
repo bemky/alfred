@@ -58,3 +58,16 @@ fi
 echo "$merged" > "$settings_file"
 
 echo "alfred: installed Claude Code config into $claude_dir$([ "$remote" = true ] && echo " (remote overlay applied)")"
+
+# tmux config lives outside the Claude config dir, so only install it once —
+# re-running for a second profile shouldn't re-copy (or re-back-up) it.
+tmux_conf="$HOME/.tmux.conf"
+if ! cmp -s "$repo_dir/tmux/tmux.conf" "$tmux_conf"; then
+  if [ -f "$tmux_conf" ]; then
+    backup="$tmux_conf.bak.$(date +%s)"
+    cp "$tmux_conf" "$backup"
+    echo "alfred: backed up existing $tmux_conf to $backup"
+  fi
+  cp "$repo_dir/tmux/tmux.conf" "$tmux_conf"
+  echo "alfred: installed tmux config into $tmux_conf"
+fi

@@ -1,7 +1,8 @@
 # alfred
 
 Bootstrap repo for agentic coding setup. Currently covers Claude Code config
-(`~/.claude`); intended to grow to cover other agentic coding tools/configs.
+(`~/.claude`) and tmux (`~/.tmux.conf`); intended to grow to cover other
+agentic coding tools/configs.
 
 ## Install
 
@@ -12,6 +13,10 @@ Bootstrap repo for agentic coding setup. Currently covers Claude Code config
 Copies `claude/*` into `~/.claude/` and merges `claude/settings.fragment.json`
 into `~/.claude/settings.json` (via `jq`, additive — won't clobber
 device-specific keys like `enabledPlugins` or `feedbackSurveyState`).
+
+Also installs `tmux/tmux.conf` as `~/.tmux.conf` (backing up any existing,
+differing file to `~/.tmux.conf.bak.<epoch>` first). This is skipped when the
+file already matches, so re-running for a second profile is a no-op for tmux.
 
 Picks the OS-specific `statusline-command-{osx,linux}.sh` and
 `fetch-usage-{osx,linux}.sh` variant based on `uname -s` and installs it as
@@ -63,8 +68,10 @@ alias claude-jll='CLAUDE_CONFIG_DIR=~/.claude-jll claude'
   `fetch-usage.sh`)
 - `claude/hooks/` — hook scripts referenced by `settings.fragment.json`
 - `claude/commands/` — custom slash commands
+- `tmux/tmux.conf` — tmux config, installed as `~/.tmux.conf`
 
 ## Updating
 
-After changing something in `~/.claude` that should be portable, copy it back
+After changing something in `~/.claude` or `~/.tmux.conf` that should be
+portable, copy it back
 into this repo (mirroring the layout above) and commit.
