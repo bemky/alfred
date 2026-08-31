@@ -1,6 +1,8 @@
 #!/bin/sh
 input=$(cat)
 
+CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+
 # --- model ---
 model=$(echo "$input" | jq -r '.model.display_name // ""')
 
@@ -15,7 +17,7 @@ if [ -d "${dir}/.git" ] || git -C "$dir" rev-parse --git-dir > /dev/null 2>&1; t
 fi
 
 # --- usage stats from cache (see fetch-usage.sh for format) ---
-CACHE_FILE="/tmp/.claude_usage_cache"
+CACHE_FILE="/tmp/.claude_usage_cache_$(basename "$CONFIG_DIR")"
 mode=""
 five_h=""
 seven_d=""
@@ -52,7 +54,7 @@ case "$mode" in
     ;;
   *)
     mode=""
-    bash ~/.claude/fetch-usage.sh > /dev/null 2>&1 &
+    bash "$CONFIG_DIR/fetch-usage.sh" > /dev/null 2>&1 &
     ;;
 esac
 

@@ -1,5 +1,7 @@
 #!/bin/sh
-# Fetches Claude usage stats and writes them to /tmp/.claude_usage_cache.
+# Fetches Claude usage stats and writes them to a $CLAUDE_CONFIG_DIR-scoped
+# cache file under /tmp (so multiple profiles, e.g. ~/.claude-jll, don't clobber
+# each other's cached usage).
 # Cache format is line-based; line 1 is the mode.
 #
 # mode "subscription" (personal plan: 5h / 7d token limits):
@@ -22,8 +24,9 @@
 #
 # All output is suppressed; meant to be run in background.
 
-CACHE_FILE="/tmp/.claude_usage_cache"
-CREDS_FILE="$HOME/.claude/.credentials.json"
+CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+CACHE_FILE="/tmp/.claude_usage_cache_$(basename "$CONFIG_DIR")"
+CREDS_FILE="$CONFIG_DIR/.credentials.json"
 
 if [ ! -f "$CREDS_FILE" ]; then
   exit 0
