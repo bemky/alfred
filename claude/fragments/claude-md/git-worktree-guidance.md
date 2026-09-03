@@ -1,4 +1,3 @@
-
 ## Concurrent sessions
 
 - Multiple Claude Code sessions may be working in the same project directory at once. Do your work in a git worktree (`git worktree add ../<project>-<branch> -b <branch>`) rather than editing files directly in the shared checkout, to avoid collisions with other sessions' uncommitted changes.
