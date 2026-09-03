@@ -9,9 +9,27 @@ Bootstrap repo for agentic coding setup. Currently covers Claude Code config
   usage (5h/7d or monthly cost/limits, whichever the account uses), and
   context-window fill. Usage numbers are fetched in the background and
   cached per-profile so the status line never blocks on a network call.
+
+  Subscription (5h/7d) account:
+  ```
+  Sonnet 5 | alfred • statusline-month-passed
+  5h 42% (2h 18m) • 7d 61% (3d 4h) | ctx 28% (57k/200k)
+  ```
+
+  Console/monthly-billing account, with the work-hours-elapsed indicator:
+  ```
+  Sonnet 5 | alfred • statusline-month-passed
+  cc 33% ($16/$50 exp Sep 13) • mo 12% ($60/$500 Oct 1) • mo passed %58 (9-5 M-F) | ctx 28% (57k/200k)
+  ```
 - **Tab/window title sync** — a hook updates the terminal tab title and (if
   running inside tmux) the tmux window name to reflect Claude's state:
   working (👷), waiting on a permission prompt (⁉️), or done (✅).
+
+  ```
+  claude 👷   ← while a prompt is being processed
+  claude ⁉️   ← while waiting on a permission prompt
+  claude ✅   ← once Claude stops and is idle
+  ```
 - **`gh api` brace-expansion allowlist** — a `PreToolUse` hook auto-approves
   `gh api` commands whose `{`/`}` characters are all inside single-quoted
   strings (e.g. GraphQL mutations), while still prompting on real shell
