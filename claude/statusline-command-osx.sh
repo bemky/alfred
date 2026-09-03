@@ -98,6 +98,71 @@ format_month_day() {
   fi
 }
 
+# --- weekday_remaining_pct: percent of remaining work hours (9am-5pm local, weekdays) in the current month ---
+weekday_remaining_pct() {
+  y=$(date +%Y)
+  m=$(date +%-m)
+  d=$(date +%-d)
+  hour=$(date +%-H)
+  min=$(date +%-M)
+
+  now_min=$(( hour*60 + min ))
+  work_start=$((9*60))
+  work_end=$((17*60))
+  if [ "$now_min" -le "$work_start" ]; then
+    today_remaining_min=$((work_end - work_start))
+  elif [ "$now_min" -ge "$work_end" ]; then
+    today_remaining_min=0
+  else
+    today_remaining_min=$((work_end - now_min))
+  fi
+
+  case $m in
+    1|3|5|7|8|10|12) last_day=31 ;;
+    4|6|9|11) last_day=30 ;;
+    2)
+      if [ $((y % 4)) -eq 0 ] && { [ $((y % 100)) -ne 0 ] || [ $((y % 400)) -eq 0 ]; }; then
+        last_day=29
+      else
+        last_day=28
+      fi
+      ;;
+  esac
+
+  # Sakamoto's algorithm month offsets, indexed by month 1-12
+  set -- 0 3 2 5 0 3 5 1 4 6 2 4
+  i=1
+  t=0
+  for off in "$@"; do
+    if [ "$i" -eq "$m" ]; then t=$off; break; fi
+    i=$((i+1))
+  done
+
+  yy=$y
+  if [ "$m" -lt 3 ]; then yy=$((y-1)); fi
+
+  total_min=0
+  remaining_min=0
+  n=1
+  while [ "$n" -le "$last_day" ]; do
+    dow=$(( (yy + yy/4 - yy/100 + yy/400 + t + n) % 7 ))
+    if [ "$dow" -ne 0 ] && [ "$dow" -ne 6 ]; then
+      total_min=$((total_min + 480))
+      if [ "$n" -gt "$d" ]; then
+        remaining_min=$((remaining_min + 480))
+      elif [ "$n" -eq "$d" ]; then
+        remaining_min=$((remaining_min + today_remaining_min))
+      fi
+    fi
+    n=$((n+1))
+  done
+
+  if [ "$total_min" -gt 0 ]; then
+    used_min=$((total_min - remaining_min))
+    echo $(( used_min * 100 / total_min ))
+  fi
+}
+
 # --- context window ---
 used=$(echo "$input" | jq -r '.context_window.used_percentage // empty')
 ctx_str=""
@@ -164,6 +229,12 @@ if [ "$mode" = "monthly" ]; then
       [ -n "$reset_label" ] && printf " %s" "$reset_label"
     fi
     printf ")\033[0m"
+  fi
+  wd_pct=$(weekday_remaining_pct)
+  if [ -n "$wd_pct" ]; then
+    if [ -n "$cc_pct" ] || [ -n "$mo_pct" ]; then printf "%b" "$SEP"; fi
+    printf "\033[38;2;156;162;175mmo passed %%%s\033[0m" "$wd_pct"
+    printf " \033[2m\033[38;2;156;162;175m(9-5 M-F)\033[0m"
   fi
 fi
 if [ -n "$ctx_str" ]; then
