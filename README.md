@@ -3,6 +3,36 @@
 Bootstrap repo for agentic coding setup. Currently covers Claude Code config
 (`~/.claude`); intended to grow to cover other agentic coding tools/configs.
 
+## Features
+
+- **Status line** — two-line prompt showing model, folder, git branch, plan
+  usage (5h/7d or monthly cost/limits, whichever the account uses), and
+  context-window fill. Usage numbers are fetched in the background and
+  cached per-profile so the status line never blocks on a network call.
+- **Tab/window title sync** — a hook updates the terminal tab title and (if
+  running inside tmux) the tmux window name to reflect Claude's state:
+  working (👷), waiting on a permission prompt (⁉️), or done (✅).
+- **`gh api` brace-expansion allowlist** — a `PreToolUse` hook auto-approves
+  `gh api` commands whose `{`/`}` characters are all inside single-quoted
+  strings (e.g. GraphQL mutations), while still prompting on real shell
+  brace expansion.
+- **`/meeting-notes` command** — turns a pasted meeting transcript into a
+  structured summary, saves it as an Apple Note, then walks through creating
+  a GitHub issue for each bug/feature request one at a time with
+  confirmation.
+- **Global CLAUDE.md** — tool-preference rules (e.g. prefer `Edit`/`Write`
+  over shell-based file edits) applied to every project.
+- **Remote/headless overlay** (`--remote` install flag) — opt-in extras for
+  shared servers: `permissions.defaultMode: bypassPermissions`, and
+  multi-session/git-worktree guidance appended to `CLAUDE.md`.
+- **Multi-profile support** — via `CLAUDE_CONFIG_DIR`, each profile gets its
+  own credentials, settings, and usage cache so several logins can run
+  side by side without clobbering each other.
+- **Cross-platform install** — `install.sh` picks the right status-line and
+  usage-fetch script for macOS (Keychain + BSD `date`) vs. Linux
+  (`.credentials.json` + GNU `date`) automatically, and merges settings via
+  `jq` without clobbering device-specific keys.
+
 ## Install
 
 ```bash
