@@ -13,14 +13,16 @@ usage() {
   cat <<'USAGE'
 Usage: install.sh [options]
 
-Feature flags (opt-in; pass none and only base editor prefs are installed):
+Feature flags (opt-in; pass none and nothing is installed):
+  --defaults                Editor prefs: model=sonnet, always-on thinking,
+                             effortLevel=medium, fullscreen TUI
   --status-line-5h          Status line: usage stats + context-window fill
   --status-line-monthly     Status line: usage stats + context-window fill
                              (same status line as --status-line-5h; the
                              script auto-detects subscription vs. monthly
                              billing at runtime — pass either or both)
-  --status-tab              Sync the terminal tab title to Claude's state
-  --status-window-tile      Sync the tmux window name to Claude's state
+  --status-tab-title        Sync the terminal tab title to Claude's state
+  --status-window-title     Sync the tmux window name to Claude's state
   --gh-expansion            Auto-allow `gh api` brace-expansion when braces
                              are only inside single-quoted strings
   --meeting-notes           Install the /meeting-notes command
@@ -31,15 +33,16 @@ Feature flags (opt-in; pass none and only base editor prefs are installed):
                              servers only, never a personal laptop)
   --git-worktree-guidance   CLAUDE.md: use a git worktree per concurrent
                              session instead of the shared checkout
-  --target=DIR              Install into DIR instead of
+  --target DIR              Install into DIR instead of
                              ${CLAUDE_CONFIG_DIR:-~/.claude}
   -h, --help                Show this help
 USAGE
 }
 
+defaults=false
 status_line=false
-status_tab=false
-status_window_tile=false
+status_tab_title=false
+status_window_title=false
 gh_expansion=false
 meeting_notes=false
 prefer_edit_tool=false
@@ -47,20 +50,29 @@ bypass_permissions=false
 git_worktree_guidance=false
 target=""
 
-for arg in "$@"; do
-  case "$arg" in
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --defaults) defaults=true ;;
     --status-line-5h|--status-line-monthly) status_line=true ;;
-    --status-tab) status_tab=true ;;
-    --status-window-tile) status_window_tile=true ;;
+    --status-tab-title) status_tab_title=true ;;
+    --status-window-title) status_window_title=true ;;
     --gh-expansion) gh_expansion=true ;;
     --meeting-notes) meeting_notes=true ;;
     --prefer-edit-tool) prefer_edit_tool=true ;;
     --bypass-permissions) bypass_permissions=true ;;
     --git-worktree-guidance) git_worktree_guidance=true ;;
-    --target=*) target="${arg#--target=}" ;;
+    --target)
+      shift
+      [ $# -gt 0 ] || { echo "alfred: --target needs a directory" >&2; exit 1; }
+      target="$1" ;;
+    # Rejected rather than accepted-as-written: bash doesn't tilde-expand after
+    # `=` in a command argument, so --target=~/dir would install into a literal
+    # `~` directory. Space-separated lets the shell expand it before we see it.
+    --target=*) echo "alfred: use '--target DIR', not '--target=DIR'" >&2; exit 1 ;;
     -h|--help) usage; exit 0 ;;
-    *) echo "alfred: unknown argument: $arg" >&2; usage >&2; exit 1 ;;
+    *) echo "alfred: unknown argument: $1" >&2; usage >&2; exit 1 ;;
   esac
+  shift
 done
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -75,20 +87,16 @@ esac
 
 mkdir -p "$claude_dir"
 
-# --- CLAUDE.md: assembled from opt-in fragments; untouched if none chosen ---
+# --- CLAUDE.md: chosen fragments appended; untouched if none chosen ---
 claude_md_fragments=()
 [ "$prefer_edit_tool" = true ] && claude_md_fragments+=("$fragments_dir/claude-md/prefer-edit-tool.md")
 [ "$git_worktree_guidance" = true ] && claude_md_fragments+=("$fragments_dir/claude-md/git-worktree-guidance.md")
 
-if [ "${#claude_md_fragments[@]}" -gt 0 ]; then
-  {
-    echo "# CLAUDE.md (global)"
-    echo
-    for f in "${claude_md_fragments[@]}"; do
-      echo
-      cat "$f"
-    done
-  } > "$claude_dir/CLAUDE.md"
+if [ -n "${claude_md_fragments[0]+x}" ]; then
+  claude_md="$claude_dir/CLAUDE.md"
+  appended="$(python3 "$repo_dir/claude/append-claude-md.py" "$claude_md" \
+    "${claude_md_fragments[@]}")"
+  echo "$appended" > "$claude_md"
 fi
 
 # --- scripts/commands: only the ones the chosen features need ---
@@ -98,13 +106,13 @@ if [ "$status_line" = true ]; then
   chmod +x "$claude_dir/statusline-command.sh" "$claude_dir/fetch-usage.sh"
 fi
 
-if [ "$status_tab" = true ]; then
+if [ "$status_tab_title" = true ]; then
   mkdir -p "$claude_dir/hooks"
   cp "$repo_dir/claude/hooks/set-tab-title.sh" "$claude_dir/hooks/set-tab-title.sh"
   chmod +x "$claude_dir/hooks/set-tab-title.sh"
 fi
 
-if [ "$status_window_tile" = true ]; then
+if [ "$status_window_title" = true ]; then
   mkdir -p "$claude_dir/hooks"
   cp "$repo_dir/claude/hooks/set-tmux-window-name.sh" "$claude_dir/hooks/set-tmux-window-name.sh"
   chmod +x "$claude_dir/hooks/set-tmux-window-name.sh"
@@ -120,31 +128,35 @@ if [ "$meeting_notes" = true ]; then
   cp "$repo_dir/claude/commands/meeting-notes.md" "$claude_dir/commands/meeting-notes.md"
 fi
 
-# --- settings.json: base prefs + one fragment per chosen feature ---
-settings_fragments=("$fragments_dir/settings/base.json")
+# --- settings.json: one fragment per chosen feature ---
+settings_fragments=()
+[ "$defaults" = true ] && settings_fragments+=("$fragments_dir/settings/defaults.json")
 [ "$status_line" = true ] && settings_fragments+=("$fragments_dir/settings/status-line.json")
-[ "$status_tab" = true ] && settings_fragments+=("$fragments_dir/settings/status-tab.json")
-[ "$status_window_tile" = true ] && settings_fragments+=("$fragments_dir/settings/status-window-tile.json")
+[ "$status_tab_title" = true ] && settings_fragments+=("$fragments_dir/settings/status-tab-title.json")
+[ "$status_window_title" = true ] && settings_fragments+=("$fragments_dir/settings/status-window-title.json")
 [ "$gh_expansion" = true ] && settings_fragments+=("$fragments_dir/settings/gh-expansion.json")
 [ "$bypass_permissions" = true ] && settings_fragments+=("$fragments_dir/settings/bypass-permissions.json")
 
+# ${arr[@]+"${arr[@]}"} so an empty array doesn't trip `set -u` on bash < 4.4.
 settings_file="$claude_dir/settings.json"
-merged="$(python3 "$repo_dir/claude/merge-settings.py" "$settings_file" "${settings_fragments[@]}")"
+merged="$(python3 "$repo_dir/claude/merge-settings.py" "$settings_file" \
+  ${settings_fragments[@]+"${settings_fragments[@]}"})"
 echo "$merged" > "$settings_file"
 
 installed=()
+[ "$defaults" = true ] && installed+=("defaults")
 [ "$status_line" = true ] && installed+=("status-line")
-[ "$status_tab" = true ] && installed+=("status-tab")
-[ "$status_window_tile" = true ] && installed+=("status-window-tile")
+[ "$status_tab_title" = true ] && installed+=("status-tab-title")
+[ "$status_window_title" = true ] && installed+=("status-window-title")
 [ "$gh_expansion" = true ] && installed+=("gh-expansion")
 [ "$meeting_notes" = true ] && installed+=("meeting-notes")
 [ "$prefer_edit_tool" = true ] && installed+=("prefer-edit-tool")
 [ "$bypass_permissions" = true ] && installed+=("bypass-permissions")
 [ "$git_worktree_guidance" = true ] && installed+=("git-worktree-guidance")
 
-if [ "${#installed[@]}" -gt 0 ]; then
+if [ -n "${installed[0]+x}" ]; then
   features="$(IFS=,; echo "${installed[*]}")"
 else
-  features="none (base editor prefs only)"
+  features="none"
 fi
 echo "alfred: installed Claude Code config into $claude_dir ($features)"

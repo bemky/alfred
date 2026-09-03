@@ -24,7 +24,13 @@ def load(path):
             text = f.read().strip()
     except FileNotFoundError:
         return {}
-    return json.loads(text) if text else {}
+    try:
+        value = json.loads(text) if text else {}
+    except json.JSONDecodeError as e:
+        sys.exit(f"alfred: {path} is not valid JSON ({e}); fix it by hand first")
+    if not isinstance(value, dict):
+        sys.exit(f"alfred: {path} must contain a JSON object, got {type(value).__name__}")
+    return value
 
 
 def assemble(fragments):
