@@ -233,7 +233,7 @@ if [ "$mode" = "monthly" ]; then
   wd_pct=$(weekday_remaining_pct)
   if [ -n "$wd_pct" ]; then
     if [ -n "$cc_pct" ] || [ -n "$mo_pct" ]; then printf "%b" "$SEP"; fi
-    printf "\033[38;2;156;162;175mmo passed %%%s\033[0m" "$wd_pct"
+    printf "\033[38;2;156;162;175mmo passed %s%%\033[0m" "$wd_pct"
     printf " \033[2m\033[38;2;156;162;175m(9-5 M-F)\033[0m"
   fi
 fi
