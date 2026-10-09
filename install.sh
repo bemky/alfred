@@ -33,6 +33,8 @@ Feature flags (opt-in; pass none and nothing is installed):
                              servers only, never a personal laptop)
   --git-worktree-guidance   AGENTS.md: use a git worktree per concurrent
                              session instead of the shared checkout
+  --instructions-warning    Warn at session start when the project has
+                             neither CLAUDE.md nor AGENTS.md
   --target DIR              Install into DIR instead of
                              ${CLAUDE_CONFIG_DIR:-~/.claude}
   -h, --help                Show this help
@@ -48,6 +50,7 @@ meeting_notes=false
 prefer_edit_tool=false
 bypass_permissions=false
 git_worktree_guidance=false
+instructions_warning=false
 target=""
 
 while [ $# -gt 0 ]; do
@@ -61,6 +64,7 @@ while [ $# -gt 0 ]; do
     --prefer-edit-tool) prefer_edit_tool=true ;;
     --bypass-permissions) bypass_permissions=true ;;
     --git-worktree-guidance) git_worktree_guidance=true ;;
+    --instructions-warning) instructions_warning=true ;;
     --target)
       shift
       [ $# -gt 0 ] || { echo "alfred: --target needs a directory" >&2; exit 1; }
@@ -136,6 +140,7 @@ settings_fragments=()
 [ "$status_window_title" = true ] && settings_fragments+=("$fragments_dir/settings/status-window-title.json")
 [ "$gh_expansion" = true ] && settings_fragments+=("$fragments_dir/settings/gh-expansion.json")
 [ "$bypass_permissions" = true ] && settings_fragments+=("$fragments_dir/settings/bypass-permissions.json")
+[ "$instructions_warning" = true ] && settings_fragments+=("$fragments_dir/settings/instructions-warning.json")
 # Claude Code reads AGENTS.md only when no CLAUDE.md exists, unless told to load both.
 [ -n "${agents_md_fragments[0]+x}" ] && settings_fragments+=("$fragments_dir/settings/instruction-files.json")
 
@@ -155,6 +160,7 @@ installed=()
 [ "$prefer_edit_tool" = true ] && installed+=("prefer-edit-tool")
 [ "$bypass_permissions" = true ] && installed+=("bypass-permissions")
 [ "$git_worktree_guidance" = true ] && installed+=("git-worktree-guidance")
+[ "$instructions_warning" = true ] && installed+=("instructions-warning")
 
 if [ -n "${installed[0]+x}" ]; then
   features="$(IFS=,; echo "${installed[*]}")"
