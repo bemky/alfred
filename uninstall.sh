@@ -24,6 +24,7 @@ Feature flags (pass the features to remove; at least one is required):
   --prefer-edit-tool        AGENTS.md: Edit/Write preference section
   --bypass-permissions      permissions.defaultMode=bypassPermissions
   --git-worktree-guidance   AGENTS.md: git-worktree section
+  --instructions-warning    SessionStart warning for missing CLAUDE.md/AGENTS.md
   --all                     Every feature above
   --target DIR              Uninstall from DIR instead of
                              ${CLAUDE_CONFIG_DIR:-~/.claude}
@@ -40,6 +41,7 @@ meeting_notes=false
 prefer_edit_tool=false
 bypass_permissions=false
 git_worktree_guidance=false
+instructions_warning=false
 target=""
 
 while [ $# -gt 0 ]; do
@@ -53,10 +55,11 @@ while [ $# -gt 0 ]; do
     --prefer-edit-tool) prefer_edit_tool=true ;;
     --bypass-permissions) bypass_permissions=true ;;
     --git-worktree-guidance) git_worktree_guidance=true ;;
+    --instructions-warning) instructions_warning=true ;;
     --all)
       defaults=true; status_line=true; status_tab_title=true; status_window_title=true
       gh_expansion=true; meeting_notes=true; prefer_edit_tool=true
-      bypass_permissions=true; git_worktree_guidance=true ;;
+      bypass_permissions=true; git_worktree_guidance=true; instructions_warning=true ;;
     --target)
       shift
       [ $# -gt 0 ] || { echo "alfred: --target needs a directory" >&2; exit 1; }
@@ -90,6 +93,7 @@ removed=()
 [ "$prefer_edit_tool" = true ] && removed+=("prefer-edit-tool")
 [ "$bypass_permissions" = true ] && removed+=("bypass-permissions")
 [ "$git_worktree_guidance" = true ] && removed+=("git-worktree-guidance")
+[ "$instructions_warning" = true ] && removed+=("instructions-warning")
 
 if [ -z "${removed[0]+x}" ]; then
   echo "alfred: pass at least one feature to remove (or --all)" >&2
@@ -105,6 +109,7 @@ settings_fragments=()
 [ "$status_window_title" = true ] && settings_fragments+=("$fragments_dir/settings/status-window-title.json")
 [ "$gh_expansion" = true ] && settings_fragments+=("$fragments_dir/settings/gh-expansion.json")
 [ "$bypass_permissions" = true ] && settings_fragments+=("$fragments_dir/settings/bypass-permissions.json")
+[ "$instructions_warning" = true ] && settings_fragments+=("$fragments_dir/settings/instructions-warning.json")
 
 settings_file="$claude_dir/settings.json"
 if [ -n "${settings_fragments[0]+x}" ] && [ -f "$settings_file" ]; then
