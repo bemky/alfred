@@ -49,6 +49,8 @@ Bootstrap repo for agentic coding setup. Currently covers Claude Code config
   a personal laptop).
 - **Git-worktree guidance** — AGENTS.md guidance to use a git worktree per
   concurrent session instead of editing a shared checkout directly.
+- **Missing-instructions warning** — a `SessionStart` hook that warns when
+  the project has neither a `CLAUDE.md` nor an `AGENTS.md`.
 - **Multi-profile support** — via `CLAUDE_CONFIG_DIR` (or `--target`), each
   profile gets its own credentials, settings, and usage cache so several
   logins can run side by side without clobbering each other.
@@ -87,6 +89,8 @@ Feature flags (opt-in; pass none and nothing is installed):
                              servers only, never a personal laptop)
   --git-worktree-guidance   AGENTS.md: use a git worktree per concurrent
                              session instead of the shared checkout
+  --instructions-warning    Warn at session start when the project has
+                             neither CLAUDE.md nor AGENTS.md
   --target DIR              Install into DIR instead of
                              ${CLAUDE_CONFIG_DIR:-~/.claude}
   -h, --help                Show this help
@@ -165,7 +169,7 @@ alias claude-jll='CLAUDE_CONFIG_DIR=~/.claude-jll claude'
   target's `AGENTS.md`
 - `claude/fragments/settings/*.json` — one settings fragment per opt-in
   flag (`defaults`, `status-line`, `status-tab-title`, `status-window-title`,
-  `gh-expansion`, `bypass-permissions`), plus `instruction-files`, applied
+  `gh-expansion`, `bypass-permissions`, `instructions-warning`), plus `instruction-files`, applied
   automatically whenever an AGENTS.md section is installed
 - `claude/merge-settings.py` — assembles the chosen fragments into
   `settings.json`, concatenating hook arrays per event so features don't
