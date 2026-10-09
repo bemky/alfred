@@ -26,12 +26,12 @@ Feature flags (opt-in; pass none and nothing is installed):
   --gh-expansion            Auto-allow `gh api` brace-expansion when braces
                              are only inside single-quoted strings
   --meeting-notes           Install the /meeting-notes command
-  --prefer-edit-tool        CLAUDE.md: prefer Edit/Write over shell-based
+  --prefer-edit-tool        AGENTS.md: prefer Edit/Write over shell-based
                              file edits
   --bypass-permissions      permissions.defaultMode=bypassPermissions
                              (no confirmation prompts — headless/shared
                              servers only, never a personal laptop)
-  --git-worktree-guidance   CLAUDE.md: use a git worktree per concurrent
+  --git-worktree-guidance   AGENTS.md: use a git worktree per concurrent
                              session instead of the shared checkout
   --target DIR              Install into DIR instead of
                              ${CLAUDE_CONFIG_DIR:-~/.claude}
@@ -87,16 +87,16 @@ esac
 
 mkdir -p "$claude_dir"
 
-# --- CLAUDE.md: chosen fragments appended; untouched if none chosen ---
-claude_md_fragments=()
-[ "$prefer_edit_tool" = true ] && claude_md_fragments+=("$fragments_dir/claude-md/prefer-edit-tool.md")
-[ "$git_worktree_guidance" = true ] && claude_md_fragments+=("$fragments_dir/claude-md/git-worktree-guidance.md")
+# --- AGENTS.md: chosen fragments appended; untouched if none chosen ---
+agents_md_fragments=()
+[ "$prefer_edit_tool" = true ] && agents_md_fragments+=("$fragments_dir/agents-md/prefer-edit-tool.md")
+[ "$git_worktree_guidance" = true ] && agents_md_fragments+=("$fragments_dir/agents-md/git-worktree-guidance.md")
 
-if [ -n "${claude_md_fragments[0]+x}" ]; then
-  claude_md="$claude_dir/CLAUDE.md"
-  appended="$(python3 "$repo_dir/claude/append-claude-md.py" "$claude_md" \
-    "${claude_md_fragments[@]}")"
-  echo "$appended" > "$claude_md"
+if [ -n "${agents_md_fragments[0]+x}" ]; then
+  agents_md="$claude_dir/AGENTS.md"
+  appended="$(python3 "$repo_dir/claude/append-agents-md.py" "$agents_md" \
+    "${agents_md_fragments[@]}")"
+  echo "$appended" > "$agents_md"
 fi
 
 # --- scripts/commands: only the ones the chosen features need ---
@@ -136,6 +136,8 @@ settings_fragments=()
 [ "$status_window_title" = true ] && settings_fragments+=("$fragments_dir/settings/status-window-title.json")
 [ "$gh_expansion" = true ] && settings_fragments+=("$fragments_dir/settings/gh-expansion.json")
 [ "$bypass_permissions" = true ] && settings_fragments+=("$fragments_dir/settings/bypass-permissions.json")
+# Claude Code reads AGENTS.md only when no CLAUDE.md exists, unless told to load both.
+[ -n "${agents_md_fragments[0]+x}" ] && settings_fragments+=("$fragments_dir/settings/instruction-files.json")
 
 # ${arr[@]+"${arr[@]}"} so an empty array doesn't trip `set -u` on bash < 4.4.
 settings_file="$claude_dir/settings.json"

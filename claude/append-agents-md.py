@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Appends CLAUDE.md sections from fragments, leaving existing content alone.
+"""Appends AGENTS.md sections from fragments, leaving existing content alone.
 
 Additive and idempotent: a fragment already present verbatim is skipped, so
 re-running the installer never duplicates a section, and anything you've
-written into CLAUDE.md yourself survives. A fragment whose heading is already
+written into AGENTS.md yourself survives. A fragment whose heading is already
 in the file but whose body differs (you edited it) is also skipped rather than
 appended a second time — both cases are reported on stderr as `kept:` lines.
 
-Usage: append-claude-md.py CLAUDE.md fragment.md [fragment.md ...]
-       (CLAUDE.md may be a path to a nonexistent file; result goes to stdout)
+Usage: append-agents-md.py AGENTS.md fragment.md [fragment.md ...]
+       (AGENTS.md may be a path to a nonexistent file; result goes to stdout)
 """
 import os
 import sys
 
-HEADER = "# CLAUDE.md (global)"
+HEADER = "# AGENTS.md (global)"
 
 
 def heading_of(block):
@@ -24,9 +24,9 @@ def heading_of(block):
 
 
 def main():
-    claude_md_path, *fragment_paths = sys.argv[1:]
+    agents_md_path, *fragment_paths = sys.argv[1:]
     try:
-        with open(claude_md_path) as f:
+        with open(agents_md_path) as f:
             text = f.read().strip()
     except FileNotFoundError:
         text = ""
