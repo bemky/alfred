@@ -188,3 +188,9 @@ alias claude-jll='CLAUDE_CONFIG_DIR=~/.claude-jll claude'
 
 After changing something in `~/.claude` that should be portable, copy it back
 into this repo (mirroring the layout above) and commit.
+
+## New System Checklist for Claude
+- [ ] Update pacman
+- [ ] Setup Github via cli
+- [ ] Install node, chromium, playwright
+- [ ] Install alfred/install.sh
