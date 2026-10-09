@@ -21,9 +21,9 @@ Feature flags (pass the features to remove; at least one is required):
   --status-window-title     tmux window name sync
   --gh-expansion            `gh api` brace-expansion allowlist hook
   --meeting-notes           The /meeting-notes command
-  --prefer-edit-tool        CLAUDE.md: Edit/Write preference section
+  --prefer-edit-tool        AGENTS.md: Edit/Write preference section
   --bypass-permissions      permissions.defaultMode=bypassPermissions
-  --git-worktree-guidance   CLAUDE.md: git-worktree section
+  --git-worktree-guidance   AGENTS.md: git-worktree section
   --all                     Every feature above
   --target DIR              Uninstall from DIR instead of
                              ${CLAUDE_CONFIG_DIR:-~/.claude}
@@ -113,19 +113,25 @@ if [ -n "${settings_fragments[0]+x}" ] && [ -f "$settings_file" ]; then
   echo "$stripped" > "$settings_file"
 fi
 
-# --- CLAUDE.md: cut out each chosen feature's section ---
-claude_md_fragments=()
-[ "$prefer_edit_tool" = true ] && claude_md_fragments+=("$fragments_dir/claude-md/prefer-edit-tool.md")
-[ "$git_worktree_guidance" = true ] && claude_md_fragments+=("$fragments_dir/claude-md/git-worktree-guidance.md")
+# --- AGENTS.md: cut out each chosen feature's section ---
+agents_md_fragments=()
+[ "$prefer_edit_tool" = true ] && agents_md_fragments+=("$fragments_dir/agents-md/prefer-edit-tool.md")
+[ "$git_worktree_guidance" = true ] && agents_md_fragments+=("$fragments_dir/agents-md/git-worktree-guidance.md")
 
-claude_md="$claude_dir/CLAUDE.md"
-if [ -n "${claude_md_fragments[0]+x}" ] && [ -f "$claude_md" ]; then
-  stripped="$(python3 "$repo_dir/claude/strip-claude-md.py" "$claude_md" \
-    "${claude_md_fragments[@]}")"
-  if [ "$stripped" = "# CLAUDE.md (global)" ]; then
-    rm -f "$claude_md"
+agents_md="$claude_dir/AGENTS.md"
+if [ -n "${agents_md_fragments[0]+x}" ] && [ -f "$agents_md" ]; then
+  stripped="$(python3 "$repo_dir/claude/strip-agents-md.py" "$agents_md" \
+    "${agents_md_fragments[@]}")"
+  if [ "$stripped" = "# AGENTS.md (global)" ]; then
+    rm -f "$agents_md"
+    # No AGENTS.md left to load, so drop the setting that made Claude Code read it.
+    if [ -f "$settings_file" ]; then
+      stripped="$(python3 "$repo_dir/claude/unmerge-settings.py" "$settings_file" \
+        "$fragments_dir/settings/instruction-files.json")"
+      echo "$stripped" > "$settings_file"
+    fi
   else
-    echo "$stripped" > "$claude_md"
+    echo "$stripped" > "$agents_md"
   fi
 fi
 

@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
-"""Removes CLAUDE.md sections that install.sh assembled from fragments.
+"""Removes AGENTS.md sections that install.sh assembled from fragments.
 
 Each fragment's text is matched verbatim and cut out, so hand-written sections
 you've added around them survive. A fragment whose text no longer appears (you
 edited it) is reported on stderr as a `kept:` line and left in place.
 
-Usage: strip-claude-md.py CLAUDE.md fragment.md [fragment.md ...]
-       (writes the new CLAUDE.md to stdout)
+Usage: strip-agents-md.py AGENTS.md fragment.md [fragment.md ...]
+       (writes the new AGENTS.md to stdout)
 """
 import os
 import sys
 
 
 def main():
-    claude_md_path, *fragment_paths = sys.argv[1:]
+    agents_md_path, *fragment_paths = sys.argv[1:]
     try:
-        with open(claude_md_path) as f:
+        with open(agents_md_path) as f:
             text = f.read()
     except FileNotFoundError:
         text = ""
